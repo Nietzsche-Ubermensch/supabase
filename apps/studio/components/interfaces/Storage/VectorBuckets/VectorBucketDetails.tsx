@@ -403,12 +403,12 @@ insert into
 values
   (
     'product_001',
-    '[${dimension === 1 ? '0.2' : `0.2, ...${dimension - 1} more floats`}]'::embd,
+    '[${dimension === 1 ? '0.2' : `0.2, ...${dimension - 1} more floats`}]'::s3vec,
     '{${metadataKeys.map((key) => `"${key}": "${key} value"`).join(', ')}}'::jsonb
   ),
   (
     'product_002',
-    '[${dimension === 1 ? '0.2' : `0.2, ...${dimension - 1} more floats`}]'::embd,
+    '[${dimension === 1 ? '0.2' : `0.2, ...${dimension - 1} more floats`}]'::s3vec,
     '{${metadataKeys.map((key) => `"${key}": "${key} value"`).join(', ')}}'::jsonb
   );`
 
