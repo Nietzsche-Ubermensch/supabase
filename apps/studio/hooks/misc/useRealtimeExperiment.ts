@@ -50,7 +50,7 @@ export function useRealtimeExperiment({
     hasTrackedExposure.current = true
 
     track('realtime_experiment_exposed', {
-      experiment_id: 'realtime_button_variant',
+      experiment_id: 'realtimeButtonVariant',
       variant: realtimeButtonVariant,
       table_has_realtime_enabled: isRealtimeEnabled,
     })

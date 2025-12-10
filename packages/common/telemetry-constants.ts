@@ -1715,7 +1715,7 @@ export interface RealtimeExperimentExposedEvent {
   action: 'realtime_experiment_exposed'
   properties: {
     /** The PostHog experiment/feature flag name */
-    experiment_id: string
+    experiment_id: 'realtimeButtonVariant'
     /** The experiment variant shown to the user */
     variant: 'control' | 'hide-button' | 'triggers'
     /** Whether the table already has realtime enabled */
