@@ -102,6 +102,9 @@ export const ApiAccessToggle = ({
   const effectivePrivileges =
     !isSchemaExposed && (isNewRecord || isDuplicating) ? emptyPrivileges : derivedPrivileges
 
+  // Cache last non-empty privileges so we can restore after disabling access.
+  const [savedPrivileges, setSavedPrivileges] = useState<ApiPrivilegesPerRole>()
+
   useEffect(() => {
     if (isSchemaExposed && apiAccessData?.privileges && tableFields.apiPrivileges === undefined) {
       onInitialLoad?.(apiAccessData.privileges)
@@ -116,12 +119,18 @@ export const ApiAccessToggle = ({
 
   const isSwitchOn = Object.values(effectivePrivileges).some((privs) => privs.length > 0)
 
+  // Keep saved privileges in sync with current non-empty selections.
+  useEffect(() => {
+    if (isSwitchOn) setSavedPrivileges(effectivePrivileges)
+  }, [effectivePrivileges, isSwitchOn])
+
   const handleMasterToggle = (checked: boolean) => {
     if (!isSchemaExposed) return
     if (!checked) {
+      setSavedPrivileges(effectivePrivileges)
       onChange?.({ anon: [], authenticated: [] })
     } else {
-      onChange?.(createDefaultRolePrivileges())
+      onChange?.(savedPrivileges ?? createDefaultRolePrivileges())
     }
   }
 
