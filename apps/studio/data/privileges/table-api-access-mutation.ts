@@ -98,8 +98,12 @@ export const useTableApiAccessPrivilegesMutation = ({
     ResponseError,
     TableApiAccessPrivilegesVariables
   >({
-    mutationFn: (vars) => updateTableApiAccessPrivileges(vars),
-    async onSuccess(data, variables, context) {
+    mutationFn: (vars: TableApiAccessPrivilegesVariables) => updateTableApiAccessPrivileges(vars),
+    async onSuccess(
+      data: UpdateTableApiAccessPrivilegesData,
+      variables: TableApiAccessPrivilegesVariables,
+      context: unknown
+    ) {
       const { projectRef, relationId } = variables
 
       await Promise.all([
@@ -109,7 +113,11 @@ export const useTableApiAccessPrivilegesMutation = ({
 
       await onSuccess?.(data, variables, context)
     },
-    async onError(data, variables, context) {
+    async onError(
+      data: ResponseError,
+      variables: TableApiAccessPrivilegesVariables,
+      context: unknown
+    ) {
       if (onError === undefined) {
         toast.error(`Failed to update API access privileges: ${data.message}`)
       } else {

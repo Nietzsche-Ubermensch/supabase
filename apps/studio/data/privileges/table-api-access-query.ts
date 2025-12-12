@@ -10,12 +10,7 @@ export type ApiAccessRole = (typeof API_ACCESS_ROLES)[number]
 
 export type ApiPrivilegeType = TablePrivilegesGrant['privilegeType']
 
-export const API_PRIVILEGE_TYPES: ApiPrivilegeType[] = [
-  'SELECT',
-  'INSERT',
-  'UPDATE',
-  'DELETE',
-]
+export const API_PRIVILEGE_TYPES: ApiPrivilegeType[] = ['SELECT', 'INSERT', 'UPDATE', 'DELETE']
 
 export type ApiPrivilegesPerRole = {
   anon: ApiPrivilegeType[]
@@ -81,7 +76,7 @@ export const useTableApiAccessQuery = (
   useTablePrivilegesQuery<TableApiAccessData>(
     { projectRef: variables.projectRef, connectionString: variables.connectionString },
     {
-      select: (data) =>
+      select: (data: TablePrivilegesData | undefined) =>
         mapPrivilegesToApiAccess(data, variables.relationId, variables.schema, variables.tableName),
       enabled:
         enabled &&
