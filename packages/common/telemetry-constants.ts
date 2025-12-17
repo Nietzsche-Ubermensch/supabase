@@ -2590,6 +2590,44 @@ export interface RequestUpgradeSubmittedEvent {
 }
 
 /**
+ * User succesfully installed an integration via the integrations marketplace in the dashboard.
+ * Note: This excludes Wrappers and Postgres Extensions.
+ *
+ * @group Events
+ * @source studio
+ * @page /dashboard/project/{ref}/integrations/{integration_slug}
+ */
+export interface IntegrationInstalledEvent {
+  action: 'integration_installed'
+  properties: {
+    /**
+     * The name of the integration installed
+     */
+    integrationName: string
+  }
+  groups: TelemetryGroups
+}
+
+/**
+ * User uninstalled an integration via the integrations marketplace in the dashboard.
+ * Note: This excludes Wrappers and Postgres Extensions.
+ *
+ * @group Events
+ * @source studio
+ * @page /dashboard/project/{ref}/integrations/{integration_slug}
+ */
+export interface IntegrationUninstalledEvent {
+  action: 'integration_uninstalled'
+  properties: {
+    /**
+     * The name of the integration installed
+     */
+    integrationName: string
+  }
+  groups: TelemetryGroups
+}
+
+/**
  * @hidden
  */
 export type TelemetryEvent =
@@ -2733,3 +2771,5 @@ export type TelemetryEvent =
   | AdvisorAssistantButtonClickedEvent
   | RequestUpgradeModalOpenedEvent
   | RequestUpgradeSubmittedEvent
+  | IntegrationInstalledEvent
+  | IntegrationUninstalledEvent
