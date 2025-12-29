@@ -1,4 +1,3 @@
-import { common, dirname, relative } from '@std/path/posix'
 import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { AlertCircle, CornerDownLeft, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -20,6 +19,64 @@ import { useSelectedOrganizationQuery } from 'hooks/misc/useSelectedOrganization
 import { useSelectedProjectQuery } from 'hooks/misc/useSelectedProject'
 import { BASE_PATH } from 'lib/constants'
 import { LogoLoader } from 'ui'
+
+const splitPath = (path: string) => {
+  const normalized = path.replace(/\/+/g, '/')
+  return {
+    hasLeadingSlash: normalized.startsWith('/'),
+    segments: normalized.split('/').filter(Boolean),
+  }
+}
+
+function common(paths: string[]): string {
+  if (paths.length === 0) return ''
+  const [first, ...rest] = paths.map(splitPath)
+  let shared = first.segments
+
+  for (const { segments } of rest) {
+    let i = 0
+    while (i < shared.length && i < segments.length && shared[i] === segments[i]) {
+      i++
+    }
+    shared = shared.slice(0, i)
+    if (shared.length === 0) {
+      return first.hasLeadingSlash ? '/' : ''
+    }
+  }
+
+  if (shared.length === 0) return first.hasLeadingSlash ? '/' : ''
+
+  return `${first.hasLeadingSlash ? '/' : ''}${shared.join('/')}`
+}
+
+function dirname(path: string): string {
+  const { segments, hasLeadingSlash } = splitPath(path)
+  if (segments.length <= 1) {
+    return hasLeadingSlash ? '/' : '.'
+  }
+  segments.pop()
+  return `${hasLeadingSlash ? '/' : ''}${segments.join('/')}`
+}
+
+function relative(from: string, to: string): string {
+  const fromSplit = splitPath(from.startsWith('/') ? from : `/${from}`)
+  const toSplit = splitPath(to.startsWith('/') ? to : `/${to}`)
+
+  let i = 0
+  while (
+    i < fromSplit.segments.length &&
+    i < toSplit.segments.length &&
+    fromSplit.segments[i] === toSplit.segments[i]
+  ) {
+    i++
+  }
+
+  const up = fromSplit.segments.slice(i).map(() => '..')
+  const down = toSplit.segments.slice(i)
+  const result = [...up, ...down].join('/')
+
+  return result
+}
 
 const CodePage = () => {
   const { ref, functionSlug } = useParams()
