@@ -75,7 +75,7 @@ function relative(from: string, to: string): string {
   const down = toSplit.segments.slice(i)
   const result = [...up, ...down].join('/')
 
-  return result
+  return result === '' ? '.' : result
 }
 
 const CodePage = () => {
