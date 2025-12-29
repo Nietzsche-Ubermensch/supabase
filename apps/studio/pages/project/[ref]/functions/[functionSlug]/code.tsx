@@ -1,4 +1,7 @@
-import { common, dirname, relative } from '@std/path/posix'
+import path from 'path-browserify'
+
+// Edge function payloads sometimes include temporary paths with or without a trailing slash.
+const TEMP_ROOT_PATHS = ['/tmp/', '/tmp']
 import { PermissionAction } from '@supabase/shared-types/out/constants'
 import { AlertCircle, CornerDownLeft, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
@@ -110,10 +113,10 @@ const CodePage = () => {
     let candidate = fileNames.find((name) => entrypoint.endsWith(name))
 
     if (candidate) {
-      return dirname(candidate)
+      return path.posix.dirname(candidate)
     } else {
       try {
-        return dirname(new URL(entrypoint).pathname)
+        return path.posix.dirname(new URL(entrypoint).pathname)
       } catch (e) {
         console.error('Failed to parse entrypoint', entrypoint)
         return '/'
@@ -164,13 +167,13 @@ const CodePage = () => {
           try {
             // if the current file and base path doesn't share a common path,
             // return unmodified file
-            const common_path = common([base_path, file.name])
-            if (common_path === '' || common_path === '/tmp/') {
+            const common_path = getCommonPath([base_path, file.name])
+            if (common_path === '' || TEMP_ROOT_PATHS.includes(common_path)) {
               return file
             }
 
             // prepend "/" to turn relative paths to absolute
-            file.name = relative('/' + base_path, '/' + file.name)
+            file.name = path.posix.relative('/' + base_path, '/' + file.name)
             return file
           } catch (e) {
             console.error(e)
@@ -265,6 +268,50 @@ const CodePage = () => {
       />
     </div>
   )
+}
+
+/**
+ * Computes the longest shared POSIX path for the provided paths.
+ *
+ * Expects absolute or normalized POSIX paths; relative markers like '.' are ignored
+ * because the caller provides absolute file paths from Edge Function payloads.
+ *
+ * @param paths - Array of paths to compare.
+ * @returns The common leading path or an empty string when none exists.
+ *
+ * @example
+ * getCommonPath(['/tmp/foo/bar', '/tmp/foo/baz']) // '/tmp/foo'
+ */
+function getCommonPath(paths: string[]): string {
+  if (paths.length === 0) return ''
+
+  const normalized = paths
+    .map((p) => path.posix.normalize(p))
+    // ignore empty or current directory markers which aren't meaningful for shared prefixes
+    .filter((p) => p !== '' && p !== '.')
+
+  if (normalized.length === 0) return ''
+  // A single normalized path is returned as-is
+  if (normalized.length === 1) return normalized[0]
+
+  const [first, ...rest] = normalized
+  const firstParts = first.split('/')
+  let end = firstParts.length
+
+  for (const current of rest) {
+    const currentParts = current.split('/')
+    let i = 0
+
+    while (i < Math.min(end, currentParts.length) && firstParts[i] === currentParts[i]) {
+      i++
+    }
+
+    end = i
+
+    if (end === 0) return ''
+  }
+
+  return firstParts.slice(0, end).join('/')
 }
 
 CodePage.getLayout = (page: React.ReactNode) => {
