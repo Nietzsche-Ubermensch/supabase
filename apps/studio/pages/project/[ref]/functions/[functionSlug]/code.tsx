@@ -30,6 +30,7 @@ const splitPath = (path: string) => {
 
 function common(paths: string[]): string {
   if (paths.length === 0) return ''
+  if (paths.length === 1) return paths[0]
   const [first, ...rest] = paths.map(splitPath)
   let shared = first.segments
 
@@ -44,8 +45,6 @@ function common(paths: string[]): string {
     }
   }
 
-  if (shared.length === 0) return first.hasLeadingSlash ? '/' : ''
-
   return `${first.hasLeadingSlash ? '/' : ''}${shared.join('/')}`
 }
 
@@ -59,20 +58,25 @@ function dirname(path: string): string {
 }
 
 function relative(from: string, to: string): string {
-  const fromSplit = splitPath(from.startsWith('/') ? from : `/${from}`)
-  const toSplit = splitPath(to.startsWith('/') ? to : `/${to}`)
+  const fromPath = from.startsWith('/') ? from : `/${from}`
+  const toPath = to.startsWith('/') ? to : `/${to}`
+  const fromSplit = splitPath(fromPath)
+  const toSplit = splitPath(toPath)
 
-  let i = 0
-  while (
-    i < fromSplit.segments.length &&
-    i < toSplit.segments.length &&
-    fromSplit.segments[i] === toSplit.segments[i]
-  ) {
-    i++
+  const fromSegments = [...fromSplit.segments]
+  const lastFrom = fromSegments[fromSegments.length - 1]
+  if (fromSegments.length > 0 && lastFrom && !fromPath.endsWith('/') && lastFrom.includes('.')) {
+    fromSegments.pop()
   }
 
-  const up = fromSplit.segments.slice(i).map(() => '..')
-  const down = toSplit.segments.slice(i)
+  let shared = 0
+  while (shared < fromSegments.length && shared < toSplit.segments.length) {
+    if (fromSegments[shared] !== toSplit.segments[shared]) break
+    shared++
+  }
+
+  const up = fromSegments.slice(shared).map(() => '..')
+  const down = toSplit.segments.slice(shared)
   const result = [...up, ...down].join('/')
 
   return result === '' ? '.' : result
