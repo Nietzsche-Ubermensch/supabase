@@ -6,7 +6,7 @@ packages:
 
 catalog:
   '@sentry/nextjs': ^10.26.0
-  '@supabase/auth-js': 2.87.0
+  '@supabase/auth-js': 2.105.4
   '@supabase/postgrest-js': 2.87.0
   '@supabase/realtime-js': 2.87.0
   '@supabase/supabase-js': 2.87.0
